@@ -1,0 +1,141 @@
+body {
+  background-color: rgb(30, 28, 28);
+  color: rgb(250, 245, 245);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  overflow: auto;
+}
+
+.button-container {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+
+
+/* Modal styles */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: scroll; 
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  border-radius: 50px;
+  background-color: #131313;
+  margin:  auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width:350px; /* Maximum width of the modal */
+  position: relative; /* Allow positioning of .close */
+}
+
+/* Ensure the modal image scales properly */
+.modal-image {
+  width: 100%;
+  height: auto;
+  display: flex;
+  margin: 0 auto;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-image {
+  width: 100%;
+  height: auto;
+  display: none; /* Hide images by default */
+}
+
+.carousel-image:first-child {
+  display: block; /* Show the first image by default */
+}
+
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -22px;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  background-color: rgba(0, 0, 0, 0.5); /* Add background for visibility */
+}
+
+.prev {
+  left: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* Close button */
+.close {
+  /* Position it within the modal-content */
+  /* position: absolute; */
+  top: -15px;
+  /* right: -5px; */
+  background-color: rgba(0, 0, 0, 0.5); /* Add background for visibility */
+  width: auto;
+  text-align: center;
+  border-radius: 3px 0 0 3px;
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: rgb(244, 239, 239);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.slide-counter {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  /* transform: translateX(-50%); */
+  color: white;
+  font-size: 18px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.carousel-video {
+  width: 100%;
+  height: auto;
+}
+
+.carousel-video video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
