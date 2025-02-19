@@ -1,95 +1,100 @@
 let currentIndex = 0;
 const carousel = document.getElementById("carousel");
 const slideCounter = document.getElementById("slideCounter");
-const fileName = 'media.txt';
-const relativePath='media/';
-const imageFormats = ['.jpeg', '.jpg', '.gif', '.png', '.webp'];
-
-
+const fileName = "media.json";
+const imageFormats = [".jpeg", ".jpg", ".gif", ".png", ".webp"];
+let touchStartX = 0;
+let touchEndX = 0;
 
 openModal("myModal", "openModal", "close");
-parseFile(fileName,relativePath);
+parseFile(fileName);
 
 
 
+carousel.addEventListener("touchstart", event => {
+  touchStartX = event.touches[0].clientX;
+});
+
+carousel.addEventListener("touchmove", event => {
+  touchEndX = event.touches[0].clientX;
+});
+
+carousel.addEventListener("touchend", () => {
+  const swipeDistance = touchStartX - touchEndX;
+
+  if (swipeDistance > 50) {
+    // Swiped left → Next slide
+    changeSlide(1);
+  } else if (swipeDistance < -50) {
+    // Swiped right → Previous slide
+    changeSlide(-1);
+  }
+});
 
 
-function parseFile(fileName,relativePath) {
-  index=0;
+function parseFile(fileName) {
   fetch(fileName)
-    .then(function (response) {
-      return response.text();
-    })
-    .then(function (text) {
-      let mediaFiles = text.split(relativePath).map(function (line, index) {
-        return index === 0 ? line.trim() : relativePath + line.trim();
-      }).filter(function (line) {
-        return line; 
+    .then(response => response.json())
+    .then(mediaFiles => {
+      console.log(`Loaded ${mediaFiles.length} media files`);
+
+      const fragment = document.createDocumentFragment();
+
+      mediaFiles.forEach(file => {
+        let element;
+        if (file.endsWith(".mp4")) {
+          element = document.createElement("video");
+          element.className = "carousel-video";
+          element.src = file;
+          element.controls = true;
+        } else if (imageFormats.some(format => file.endsWith(format))) {
+          element = document.createElement("img");
+          element.className = "carousel-image";
+          element.src = file;
+          element.alt = file;
+        }
+
+        if (element) fragment.appendChild(element);
       });
 
-      mediaFiles.forEach(function (file) {
-        if (file.endsWith('.mp4')) {
-          const video = document.createElement('video');
-          video.className = 'carousel-video';
-          video.src = file;
-          video.controls = true;
-          carousel.appendChild(video);
-        } else if (imageFormats.some(function (format) {
-          return file.endsWith(format);
-        })) {
-          const img = document.createElement('img');
-          img.className = 'carousel-image';
-          img.src = file;
-          img.alt = file;
-          carousel.appendChild(img);
-        }
-      });
-      showSlide(index); 
-    });
+      carousel.appendChild(fragment);
+      showSlide(0);
+    })
+    .catch(error => console.error("Error loading media.json:", error));
 }
 
-
+function getSlides() {
+  return document.querySelectorAll(".carousel-image, .carousel-video");
+}
 
 function showSlide(index) {
-  const slides = document.querySelectorAll(".carousel-image, .carousel-video");
-  if (index >= slides.length) {
-    currentIndex = 0;
-  }
-  if (index < 0) {
-    currentIndex = slides.length - 1;
-  }
+  const slides = getSlides();
+  if (slides.length === 0) return;
 
-  slides.forEach(function (slide) {
+  currentIndex = (index + slides.length) % slides.length;
+
+  slides.forEach(slide => {
     slide.style.display = "none";
-    if (slide.tagName === 'VIDEO') {
-      slide.pause();
-    }
-  })
+    if (slide.tagName === "VIDEO") slide.pause();
+  });
 
-
-  
   slides[currentIndex].style.display = "block";
-  if (slides[currentIndex].tagName === 'VIDEO') {
-    slides[currentIndex].play();
-  }
+  if (slides[currentIndex].tagName === "VIDEO") slides[currentIndex].play();
 
   updateSlideCounter();
 }
 
 function changeSlide(direction) {
-    currentIndex += direction;
-    showSlide(currentIndex);
+  showSlide(currentIndex + direction);
 }
 
 function updateSlideCounter() {
-  const slides = document.querySelectorAll(".carousel-image, .carousel-video");
+  const slides = getSlides();
   slideCounter.textContent = `${currentIndex + 1}/${slides.length}`;
 }
 
 function pauseVideo(videos) {
-  videos.forEach(function (video) {
-    video.pause();
-  });
+  videos.forEach(video => video.pause());
 }
 
 function openModal(modalId, buttonID, closeClass) {
@@ -97,58 +102,41 @@ function openModal(modalId, buttonID, closeClass) {
   const btn = document.getElementById(buttonID);
   const span = document.getElementsByClassName(closeClass)[0];
 
-
-  btn.addEventListener('click', function () {
-    console.log("Button was clicked!");
-    modal.style.display = "block";
-    showSlide(0); 
-  });
-
- 
-  span.addEventListener('click', function () {
-    console.log("Close button was clicked!");
+  function closeModal() {
     modal.style.display = "none";
-  
-    const videos = modal.querySelectorAll('video');
-    pauseVideo(videos);
+    pauseVideo(modal.querySelectorAll("video"));
+  }
 
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+    showSlide(0);
+  });
+
+  span.addEventListener("click", closeModal);
+  window.addEventListener("click", event => {
+    if (event.target === modal) closeModal();
+  });
+
+  window.addEventListener("keydown", event => {
+    if (event.key === "Escape") closeModal();
+    else if (event.key === "ArrowLeft") changeSlide(-1);
+    else if (event.key === "ArrowRight") changeSlide(1);
   });
 
 
-  window.addEventListener('click', function (event) {
-    if (event.target === modal) {
-      modal.style.display = "none";
-
-      const videos = modal.querySelectorAll('video');
-      pauseVideo(videos);
-
-    }
+  window.addEventListener("touchstart", event => {
+    touchStartX = event.touches[0].clientX;
   });
-
   
-  window.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') {
-      modal.style.display = "none";
-   
-      const videos = modal.querySelectorAll('video');
-      pauseVideo(videos);
-
-    } else if (event.key === 'ArrowLeft') {
-      changeSlide(-1); 
-    } else if (event.key === 'ArrowRight') {
-      changeSlide(1); 
-
-    } else if (event.key === ' ') { 
-      const currentSlide = document.querySelectorAll(".carousel-image, .carousel-video")[currentIndex];
-      if (currentSlide.tagName === 'VIDEO') {
-        if (currentSlide.paused) {
-          currentSlide.play();
-        } else {
-          currentSlide.pause();
-        }
-      }
+  window.addEventListener("touchmove", event => {
+    touchEndX = event.touches[0].clientX;
+  });
+  
+  window.addEventListener("touchend", () => {
+    const swipeDistance = touchStartX - touchEndX;
+  
+    if (Math.abs(swipeDistance) > 50) {
+      changeSlide(swipeDistance > 0 ? 1 : -1);
     }
   });
 }
-
-
